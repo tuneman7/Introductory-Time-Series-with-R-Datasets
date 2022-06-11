@@ -15,7 +15,8 @@ I have also added my typing of the R files;
 
 Some of the R in the book is outdated, so I've had to improvise, so far it is working well.
 
-functions.R
-chapter1.R
-chapter2.R
-chapter2.RMD
+functions.R   
+chapter1.R   
+chapter2.R   
+chapter2.Rmd  
+
