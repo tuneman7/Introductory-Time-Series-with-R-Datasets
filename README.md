@@ -1,9 +1,10 @@
-# Introductory-Time-Series-with-R-Datasets
+# Datasets for Introductory Time Series with R
 
-The datasets referenced in the book do not work.
+This repo contains the datasets associated with the book:
 
-I've aggregated the dataset and have created R files for certain chapters that I work through.
+  **Introductory Time Series with R**  
+  by Paul S.P. Cowpertwait and  Andrew V. Metcalfe  
+  Link: https://www.springer.com/us/book/9780387886978  
+  DOI: 10.1007/978-0-387-88698-5  
 
-The R is not the same exactly as what is in the text as the text is a little dated.
-
-Don Irwin
+I uploaded the datasets here because the links to the data that the authors mention in their book do not work anymore. I have used datasets in these repositories exclusively for academic purposes. I consider using these datasets for education fair use. If you find a repo from the authors, please let me know and I will take this repository down.
