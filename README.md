@@ -18,4 +18,4 @@ Some of the R in the book is outdated, so I've had to improvise, so far it is wo
 functions.R
 chapter1.R
 chapter2.R
-
+chapter2.RMD
