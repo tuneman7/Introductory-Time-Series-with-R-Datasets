@@ -148,6 +148,14 @@ cat(paste(output, collapse="\n"))
 
 #2.3.3 Example based on the Font Reservoir series
 
-```{r}
+```{r , echo=FALSE, message=FALSE, warnings=FALSE}
+
+Fontdsdt.dat <- read.table(fileandpath("Fontdsdt.dat"), header=T)
+attach(Fontdsdt.dat)
+plot(ts(adflow), ylab = 'adflow')
 
 ```
+```{r}
+acf(adflow, xlab = 'lag (months)', main="")
+```
+
