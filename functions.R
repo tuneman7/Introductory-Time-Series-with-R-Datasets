@@ -41,10 +41,6 @@ get_my_wd <- function()
   return(current_path)
 }
 
-directory <-get_my_wd()
-print(get_my_wd())
-print(the_file)
-
 fileandpath <- function(filename)
 {
   my_file <- paste(directory,"/",filename,sep="")
