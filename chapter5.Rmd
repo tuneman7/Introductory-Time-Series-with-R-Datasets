@@ -1,0 +1,335 @@
+---
+title: "chapter5"
+output: html_document
+date: '2022-06-11'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+#```{r setup echo=FALSE, message=FALSE, warnings=FALSE}
+```{r setup }
+list.of.packages <- c("rstudioapi","tidyverse","patchwork")
+
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+library(rstudioapi)
+library(tidyverse)
+library(patchwork)
+
+get_my_wd <- function()
+{
+  current_doc <- getActiveDocumentContext()$path 
+  current_path <- str_replace(str_replace(paste(gsub("(.*)/.*","\\1",current_doc),"")," ",""), " ","")
+  return(current_path)
+}
+
+directory <-get_my_wd()
+
+r_file = paste(directory,"/functions.R",sep="")
+print(get_my_wd())
+print(r_file)
+
+source(r_file)
+```
+# 5.2.2 Stationarity
+
+
+```{r pressure, echo=FALSE}
+ set.seed(1)
+ z <- w <- rnorm(100, sd = 20)
+ for (t in 2:100) z[t] <- 0.8 * z[t - 1] + w[t]
+ Time <- 1:100
+ x <- 50 + 3 * Time + z
+ plot(x, xlab = "time", type = "l")
+```
+The model for the code above can be expressed as xt = 50 + 3t + zt , where
+{zt } is the AR(1) process zt = 0.8zt−1 + wt and {wt } is Gaussian white noise
+with σ = 20. A time plot of a realisation of {xt } is given in Figure 5.1.
+
+
+# Fitted models
+
+```{r pressure, echo=FALSE}
+x.lm <- lm(x ~ Time)
+coef(x.lm)
+sqrt(diag(vcov(x.lm)))
+```
+
+
+```{r pressure, echo=FALSE}
+my_acf<-ggAcf(resid(x.lm)) 
+
+my_pacf<-ggPacf(resid(x.lm))
+
+my_acf/
+  my_pacf
+
+```
+
+# 5.3.2 Model fitted to the temperature series (1970–2005)
+
+
+```{r pressure, echo=FALSE}
+
+global.dat <- read.table(fileandpath("global.dat"), header = T)
+
+
+Global <- scan(fileandpath("global.dat"))
+Global.ts <- ts(Global, st = c(1856, 1), end = c(2005,12), fr = 12)
+temp <- window(Global.ts, start = 1970)
+temp.lm <- lm(temp ~ time(temp))
+coef(temp.lm)
+
+time(temp)
+
+ confint(temp.lm)
+
+myacf <-ggAcf(resid(lm(temp ~ time(temp))))
+
+myacf
+
+```
+
+
+
+
+# 5.4 Generalised least squares
+
+
+
+```{r pressure, echo=FALSE}
+
+list.of.packages <- c("nlme")
+
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+library(nlme)
+
+
+
+x.gls <- gls(x ~ Time, cor = corAR1(0.8))
+coef(x.gls)
+sqrt(diag(vcov(x.gls)))
+
+```
+
+
+
+# 5.4.2 Confidence interval for the trend in the temperature series
+
+
+
+```{r pressure, echo=FALSE}
+
+temp.gls <- gls(temp ~ time(temp), cor = corAR1(0.7))
+confint(temp.gls)
+
+```
+
+# 5.5 Linear models with seasonal variables
+
+
+```{r pressure, echo=FALSE}
+
+temp.gls <- gls(temp ~ time(temp), cor = corAR1(0.7))
+confint(temp.gls)
+
+```
+
+
+# 5.5.3 Example: Seasonal model for the temperature series
+
+```{r pressure, echo=FALSE}
+
+Seas <- cycle(temp)
+Time <- time(temp)
+temp.lm <- lm(temp ~ 0 + Time + factor(Seas))
+coef(temp.lm)
+
+```
+
+
+
+```{r pressure, echo=FALSE}
+
+new.t <- seq(2006, len = 2 * 12, by = 1/12)
+alpha <- coef(temp.lm)[1]
+beta <- rep(coef(temp.lm)[2:13], 2)
+(alpha * new.t + beta)[1:4]
+
+```
+
+
+
+```{r pressure, echo=FALSE}
+
+new.dat <- data.frame(Time = new.t, Seas = rep(1:12, 2))
+predict(temp.lm, new.dat)[1:24]
+
+```
+
+# 5.7 Logarithmic transformations
+
+# 5.7.2 Example using the air passenger series
+
+
+```{r pressure, echo=FALSE}
+
+data(AirPassengers)
+AP <- AirPassengers
+plot(AP)
+plot(log(AP))
+
+```
+
+```{r}
+
+
+SIN <- COS <- matrix(nr = length(AP), nc = 6)
+ for (i in 1:6) {
+SIN[, i] <- sin(2 * pi * i * time(AP))
+COS[, i] <- cos(2 * pi * i * time(AP))
+}
+TIME <- (time(AP) - mean(time(AP)))/sd(time(AP))
+mean(time(AP))
+
+sd(time(AP))
+
+AP.lm1 <- lm(log(AP) ~ TIME + I(TIME^2) + I(TIME^3) + I(TIME^4) +
+SIN[,1] + COS[,1] + SIN[,2] + COS[,2] + SIN[,3] + COS[,3] +
+SIN[,4] + COS[,4] + SIN[,5] + COS[,5] + SIN[,6] + COS[,6])
+coef(AP.lm1)/sqrt(diag(vcov(AP.lm1)))
+
+AP.lm2 <- lm(log(AP) ~ TIME + I(TIME^2) + SIN[,1] + COS[,1] +
+SIN[,2] + COS[,2] + SIN[,3] + SIN[,4] + COS[,4] + SIN[,5])
+coef(AP.lm2)/sqrt(diag(vcov(AP.lm2)))
+
+AIC(AP.lm1)
+AIC(AP.lm2)
+
+```
+
+```{r}
+acf1 <- ggAcf(resid(AP.lm1))
+acf2 <- ggPacf(resid(AP.lm1))
+
+
+acf1 / 
+  acf2
+
+```
+
+
+```{r}
+
+AP.gls <- gls(log(AP) ~ TIME + I(TIME^2) + SIN[,1] + COS[,1] +
+SIN[,2] + COS[,2] + SIN[,3] + SIN[,4] + COS[,4] + SIN[,5],
+cor = corAR1(0.6))
+coef(AP.gls)/sqrt(diag(vcov(AP.gls)))
+
+AP.ar <- ar(resid(AP.lm2), order = 1, method = "mle")
+AP.ar$ar
+
+
+```
+```{r}
+
+ ggAcf(AP.ar$res[-1])
+
+```
+
+# 5.8.2 Example of a simulated and fitted non-linear series
+
+```{r}
+
+ set.seed(1)
+ w <- rnorm(100, sd = 10)
+ z <- rep(0, 100)
+ for (t in 2:100) z[t] <- 0.7 * z[t - 1] + w[t]
+ Time <- 1:100
+ f <- function(x) exp(1 + 0.05 * x)
+ x <- f(Time) + z
+ plot(x, type = "l")
+ abline(0, 0)
+
+```
+
+
+
+```{r}
+
+x.nls <- nls(x ~ exp(alp0 + alp1 * Time), start = list(alp0 = 0.1, alp1 = 0.5))
+summary(x.nls)$parameters
+
+```
+
+
+
+```{r}
+
+new.t <- time(ts(start = 1961, end = c(1970, 12), fr = 12))
+TIME <- (new.t - mean(time(AP)))/sd(time(AP))
+SIN <- COS <- matrix(nr = length(new.t), nc = 6)
+for (i in 1:6) {
+COS[, i] <- cos(2 * pi * i * new.t)
+SIN[, i] <- sin(2 * pi * i * new.t)
+}
+SIN <- SIN[, -6]
+new.dat <- data.frame(TIME = as.vector(TIME), SIN = SIN,
+COS = COS)
+AP.pred.ts <- exp(ts(predict(AP.lm2, new.dat), st = 1961,
+fr = 12))
+ts.plot(log(AP), log(AP.pred.ts), lty = 1:2)
+ts.plot(AP, AP.pred.ts, lty = 1:2)
+
+
+```
+
+# 5.10 Inverse transform and bias correction
+
+## 5.10.1 Log-normal residual errors
+
+
+
+```{r}
+
+set.seed(1)
+sigma <- 1
+w <- rnorm(1e+06, sd = sigma)
+mean(w)
+mean(exp(w))
+exp(sigma^2/2)
+```
+
+
+## 5.10.2 Empirical correction factor for forecasting means
+## 5.10.3 Example using the air passenger data
+
+```{r}
+
+summary(AP.lm2)$r.sq
+
+sigma <- summary(AP.lm2)$sigma
+lognorm.correction.factor <- exp((1/2) * sigma^2)
+empirical.correction.factor <- mean(exp(resid(AP.lm2)))
+lognorm.correction.factor
+empirical.correction.factor
+AP.pred.ts1 <- AP.pred.ts * empirical.correction.factor
+
+```
+```{r}
+
+autoplot(AP.pred.ts1)
+
+```
+
+```{r}
+
+autoplot(AP.pred.ts)
+
+```
