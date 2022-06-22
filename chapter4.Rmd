@@ -74,6 +74,10 @@ plot(x, type = "l")
 
 
 
+```{r pressure, echo=FALSE}
+x <- seq(-3,3, length = 1000)
+hist(rnorm(100), prob = T); points(x, dnorm(x), type = "l")
+```
 
 
 
@@ -83,9 +87,71 @@ hist(rnorm(100), prob = T); points(x, dnorm(x), type = "l")
 ```
 
 
+# 4.5.5 Correlogram of an AR(1) process
+
+```{r}
+
+rho <- function(k, alpha) alpha^k
+ layout(1:2)
+ plot(0:10, rho(0:10, 0.7), type = "b")
+ plot(0:10, rho(0:10, -0.7), type = "b")
+ 
+```
+
+```{r}
+
+rho <- function(k, alpha) alpha^k
+ layout(1:2)
+ plot(0:10, rho(0:10, 0.1), type = "b")
+ plot(0:10, rho(0:10, 2), type = "b")
+  plot(0:10, rho(0:10, 0.2), type = "b")
+ plot(0:10, rho(0:10, -.3), type = "b")
+ 
+```
+
+#4.5.7 Simulation
+
+An AR(1) process can be simulated in R as follows:
 
 
-```{r pressure, echo=FALSE}
-x <- seq(-3,3, length = 1000)
-hist(rnorm(100), prob = T); points(x, dnorm(x), type = "l")
+```{r}
+
+set.seed(1)
+x <- w <- rnorm(100)
+for (t in 2:100) x[t] <- 0.7 * x[t - 1] + w[t]
+plot(x, type = "l")
+acf(x)
+pacf(x)
+```
+
+
+#4.6 Fitted models
+##4.6.1 Model fitted to simulated series
+
+```{r}
+
+x.ar <- ar(x, method = "mle")
+print(x.ar$order)
+print(x.ar$ar)
+print(x.ar$ar + c(-2, 2) * sqrt(x.ar$asy.var))
+
+```
+
+
+
+```{r}
+
+the_file = paste(directory,"/pounds_nz.dat",sep="")
+Z <- read.table(the_file, header = T)
+Z[1:4,]
+Z.ts <- ts(Z, st = 1991, fr = 4)
+
+Z.ar <- ar(Z.ts)
+mean(Z.ts)
+print(Z.ar$order)
+print(Z.ar$ar)
+print(Z.ar$ar + c(-2, 2) * sqrt(Z.ar$asy.var))
+
+acf(Z.ar$res[-1])
+
 ```
