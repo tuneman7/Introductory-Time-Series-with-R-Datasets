@@ -90,6 +90,8 @@ Z <- read.table(the_file, header = T)
 Z[1:4,]
 Z.ts <- ts(Z, st = 1991, fr = 4)
 
+x.ma <- arima(Z.ts, order = c(0, 0, 1))
+x.ma
 
 ```
 
