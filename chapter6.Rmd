@@ -34,109 +34,53 @@ print(r_file)
 
 source(r_file)
 ```
-# 2.2.1 Expected value
 
-We now use R to calculate the covariance for the Herald Square pairs in
-three different ways:
+# 6.3.2 R examples: Correlogram and simulation
 
-
-```{r pressure, echo=FALSE}
-set.seed(1)
-w <- rnorm(100)
-plot(w, type = "l")
-```
-
-
-```{r pressure, echo=FALSE}
-x <- seq(-3,3, length = 1000)
-hist(rnorm(100), prob = T); points(x, dnorm(x), type = "l")
-```
+The autocorrelation function for an MA(q) process (Equation (6.3)) can read-
+ily be implemented in R, and a simple version, without any detailed error
+checks, is given below. Note that the function takes the lag k and the model
+parameters βi for i = 0, 1, . . . , q, with β0 = 1. For the non-zero values (i.e.,
+values within the else part of the if-else statement), the autocorrelation
+function is computed in two stages using a for loop. The first loop generates
+a sum (s1) for the autocovariance, whilst the second loop generates a sum
+(s2) for the variance, with the division of the two sums giving the returned
+autocorrelation (ACF).
 
 
 ```{r pressure, echo=FALSE}
-set.seed(2)
-acf(rnorm(100))
+
+rho <- function(k, beta) {
+  q <- length(beta) - 1
+if (k > q) ACF <- 0 else {
+    s1 <- 0; s2 <- 0
+    for (i in 1:(q-k+1)) s1 <- s1 + beta[i] * beta[i+k]
+    for (i in 1:(q+1)) s2 <- s2 + beta[i]^2
+  ACF <- s1 / s2}
+  ACF}
+
 ```
-
-
-
-
-```{r pressure, echo=FALSE}
-#4.3.7 Simulation
-#It is often helpful to study a time series model by simulation. This enables the
-#main features of the model to be observed in plots, so that when historical data
-#exhibit similar features, the model may be selected as a potential candidate.
-#The following commands can be used to simulate random walk data for x:
-x <- w <- rnorm(1000)
-for (t in 2:1000) x[t] <- x[t - 1] + w[t]
-plot(x, type = "l")
-```
-
-
-
-```{r pressure, echo=FALSE}
-x <- seq(-3,3, length = 1000)
-hist(rnorm(100), prob = T); points(x, dnorm(x), type = "l")
-```
-
-
-
-```{r pressure, echo=FALSE}
-x <- seq(-3,3, length = 1000)
-hist(rnorm(100), prob = T); points(x, dnorm(x), type = "l")
-```
-
-
-# 4.5.5 Correlogram of an AR(1) process
-
-```{r}
-
-rho <- function(k, alpha) alpha^k
- layout(1:2)
- plot(0:10, rho(0:10, 0.7), type = "b")
- plot(0:10, rho(0:10, -0.7), type = "b")
- 
-```
-
-```{r}
-
-rho <- function(k, alpha) alpha^k
- layout(1:2)
- plot(0:10, rho(0:10, 0.1), type = "b")
- plot(0:10, rho(0:10, 2), type = "b")
-  plot(0:10, rho(0:10, 0.2), type = "b")
- plot(0:10, rho(0:10, -.3), type = "b")
- 
-```
-
-#4.5.7 Simulation
-
-An AR(1) process can be simulated in R as follows:
 
 
 ```{r}
 
-set.seed(1)
-x <- w <- rnorm(100)
-for (t in 2:100) x[t] <- 0.7 * x[t - 1] + w[t]
-plot(x, type = "l")
-acf(x)
-pacf(x)
+beta <- c(1, 0.7, 0.5, 0.2)
+rho.k <- rep(1, 10)
+for (k in 1:10) 
+{
+  rho.k[k] <- rho(k, beta)
+}
+plot(0:10, c(1, rho.k), pch = 4, ylab = expression(rho[k]))
+abline(0, 0)
+
 ```
-
-
-#4.6 Fitted models
-##4.6.1 Model fitted to simulated series
 
 ```{r}
 
-x.ar <- ar(x, method = "mle")
-print(x.ar$order)
-print(x.ar$ar)
-print(x.ar$ar + c(-2, 2) * sqrt(x.ar$asy.var))
+x.ma <- arima(x, order = c(0, 0, 3))
+x.ma
 
 ```
-
 
 
 ```{r}
@@ -146,48 +90,6 @@ Z <- read.table(the_file, header = T)
 Z[1:4,]
 Z.ts <- ts(Z, st = 1991, fr = 4)
 
-Z.ar <- ar(Z.ts)
-mean(Z.ts)
-print(Z.ar$order)
-print(Z.ar$ar)
-print(Z.ar$ar + c(-2, 2) * sqrt(Z.ar$asy.var))
-
-acf(Z.ar$res[-1])
 
 ```
 
-
-
-
-```{r}
-
-the_file = paste(directory,"/global.dat",sep="")
-Global = scan(the_file)
-Global.ts = ts(Global, st = c(1856, 1), end = c(2005, 12), fr = 12)
-
-Global.ar <- ar(aggregate(Global.ts, FUN = mean), method = "mle")
-print( mean(aggregate(Global.ts, FUN = mean)))
-#[1] -0.1383
-print( Global.ar$order)
-print(Global.ar$ar)
-
-#[1] 0.58762 0.01260 0.11117 0.26764
-#−0.2
-#0.2
-acf(Global.ar$res[-(1:Global.ar$order)], lag = 50)
-
-
-```
-
-
-```{r}
-
-
-
-```
-
-
-```{r}
-
-
-```
