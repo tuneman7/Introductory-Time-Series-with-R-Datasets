@@ -71,7 +71,64 @@ x <- w <- rnorm(1000)
 for (t in 2:1000) x[t] <- x[t - 1] + w[t]
 plot(x, type = "l")
 ```
+```{r}
 
+
+acf(x)
+
+```
+
+```{r}
+#differences:
+
+acf(diff(x))
+```
+```{r}
+#Exchange Rates am here
+directory <-get_my_wd()
+
+print(get_my_wd())
+print(r_file)
+the_file = paste(directory,"/pounds_nz.dat",sep="")
+print(the_file)
+Z <- read.table(the_file, header = T)
+Z[1:4,]
+Z.ts <- ts(Z, st = 1991, fr = 4)
+
+Z.ar <- ar(Z.ts)
+mean(Z.ts)
+print(Z.ar$order)
+print(Z.ar$ar)
+print(Z.ar$ar + c(-2, 2) * sqrt(Z.ar$asy.var))
+
+acf(Z.ar$res[-1])
+
+Z.hw <-HoltWinters(Z.ts,alpha=1,gamma=0)
+
+acf(resid(Z.hw))
+
+```
+
+```{r}
+
+# 4.4.3 Random walk with drift
+# Company stockholders generally expect their investment to increase in value
+# despite the volatility of financial markets. The random walk model can be
+# adapted to allow for this by including a drift parameter δ.
+
+directory <-get_my_wd()
+print(get_my_wd())
+the_file = paste(directory,"/HP.txt",sep="")
+print(the_file)
+www <- the_file
+HP.dat <- read.table(www, header = T) ; attach(HP.dat)
+plot (as.ts(Price))
+DP <- diff(Price) ; 
+plot (as.ts(DP)) ; 
+acf (DP)
+mean(DP) + c(-2, 2) * sd(DP)/sqrt(length(DP))
+
+```
 
 
 ```{r pressure, echo=FALSE}

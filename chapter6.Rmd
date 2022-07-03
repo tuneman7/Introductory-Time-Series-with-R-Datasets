@@ -33,6 +33,7 @@ print(get_my_wd())
 print(r_file)
 
 source(r_file)
+
 ```
 
 # 6.3.2 R examples: Correlogram and simulation
@@ -95,3 +96,10 @@ x.ma
 
 ```
 
+## 6.5 Mixed models.
+
+```{r}
+
+
+
+```
