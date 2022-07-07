@@ -1,0 +1,65 @@
+---
+title: "chapter11"
+output: html_document
+date: '2022-07-05'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+#```{r setup echo=FALSE, message=FALSE, warnings=FALSE}
+```{r setup }
+list.of.packages <- c("rstudioapi","tidyverse")
+
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+library(rstudioapi)
+library(tidyverse)
+get_my_wd <- function()
+{
+  current_doc <- getActiveDocumentContext()$path 
+  current_path <- str_replace(str_replace(paste(gsub("(.*)/.*","\\1",current_doc),"")," ",""), " ","")
+  return(current_path)
+}
+
+directory <-get_my_wd()
+
+r_file = paste(directory,"/functions.R",sep="")
+print(get_my_wd())
+print(r_file)
+
+source(r_file)
+
+```
+
+
+11.2 -- Spurious Regression.
+
+```{r}
+
+the_file = paste(directory,"/cbe.dat",sep="")
+CBE = read.table(the_file,header=T)
+
+Elec.ts <- ts(CBE[, 3], start = 1958, freq = 12)
+Choc.ts <- ts(CBE[, 1], start = 1958, freq = 12)
+
+plot(as.vector(aggregate(Choc.ts)))
+plot(aggregate(Elec.ts))
+plot(as.vector(aggregate(Choc.ts)), aggregate(Elec.ts))
+
+
+```
+
+
+
+
+
+```{r}
+
+
+
+```
